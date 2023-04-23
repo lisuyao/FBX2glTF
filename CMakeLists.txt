@@ -45,8 +45,24 @@ find_package(Threads REQUIRED)
 list(INSERT CMAKE_MODULE_PATH 0 "${CMAKE_BINARY_DIR}")
 
 # stuff we get from Conan
-find_package(boost_filesystem MODULE REQUIRED)
-find_package(boost_optional MODULE REQUIRED)
+#find_package(boost_filesystem MODULE REQUIRED)
+#find_package(boost_optional MODULE REQUIRED)
+
+#find_package(Boost 1.69.0 REQUIRED
+#        COMPONENTS system filesystem thread)
+#find_package(boost MODULE REQUIRED)
+find_package(Boost REQUIRED COMPONENTS filesystem)
+
+
+MESSAGE("Boost information:") 
+#MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_INCLUDE_DIRS}") 
+#MESSAGE("  Boost_LIBRARIES: ${Boost_LIBRARIES}") 
+#MESSAGE("  Boost_LIBRARY_DIRS: ${Boost_LIBRARY_DIRS}")
+#include_directories(${Boost_INCLUDE_DIRS})
+MESSAGE("  Boost_INCLUDE_DIRS: ${Boost_filesystem_INCLUDE_DIRS}") 
+include_directories(${Boost_filesystem_INCLUDE_DIRS})
+
+
 find_package(libxml2 MODULE REQUIRED)
 find_package(zlib MODULE REQUIRED)
 find_package(fmt MODULE REQUIRED)
@@ -56,8 +72,7 @@ set(CMAKE_EXPORT_COMPILE_COMMANDS ON)
 
 # DRACO
 ExternalProject_Add(Draco
-  GIT_REPOSITORY https://github.com/google/draco
-  GIT_TAG 1.3.4
+  URL C:/Users/sharecreators/Documents/Third/draco
   PREFIX draco
   INSTALL_DIR
   CMAKE_ARGS
@@ -76,8 +91,7 @@ set(mathfu_build_benchmarks OFF CACHE BOOL "")
 set(mathfu_build_tests OFF CACHE BOOL "")
 ExternalProject_Add(MathFu
   PREFIX mathfu
-  GIT_REPOSITORY https://github.com/google/mathfu
-  GIT_TAG v1.1.0
+  URL C:/Users/sharecreators/Documents/Third/mathfu
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping MathFu configure step."
   BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping MathFu build step."
   INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping MathFu install step."
@@ -89,7 +103,7 @@ set(MATHFU_INCLUDE_DIRS
 # OrderedMap
 ExternalProject_Add(FiFoMap
   PREFIX fifo_map
-  GIT_REPOSITORY https://github.com/nlohmann/fifo_map
+  URL C:/Users/sharecreators/Documents/GitHub/fifo_map
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping FiFoMap configure step."
   BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping FiFoMap build step."
   INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping FiFoMap install step."
@@ -100,7 +114,7 @@ set(FIFO_MAP_INCLUDE_DIR "${CMAKE_BINARY_DIR}/fifo_map/src/FiFoMap/src")
 # cppcodec
 ExternalProject_Add(CPPCodec
   PREFIX cppcodec
-  GIT_REPOSITORY https://github.com/tplgy/cppcodec
+  URL C:/Users/sharecreators/Documents/GitHub/cppcodec
   CONFIGURE_COMMAND ${CMAKE_COMMAND} -E echo "Skipping CPPCodec configure step."
   BUILD_COMMAND ${CMAKE_COMMAND} -E echo "Skipping CPPCodec build step."
   INSTALL_COMMAND ${CMAKE_COMMAND} -E echo "Skipping CPPCodec install step."
@@ -201,14 +215,16 @@ endif()
 
 target_link_libraries(libFBX2glTF
   ${FRAMEWORKS}
-  boost_filesystem::boost_filesystem
-  boost_optional::boost_optional
+#  boost_filesystem::boost_filesystem
+#  boost_optional::boost_optional
+#  ${Boost_LIBRARIES}
+  Boost::filesystem
   ${DRACO_LIB}
   optimized ${FBXSDK_LIBRARY}
   debug ${FBXSDK_LIBRARY_DEBUG}
   fmt::fmt
-  libxml2::libxml2
-  zlib::zlib
+  LibXml2::LibXml2
+  ZLIB::ZLIB
   ${CMAKE_DL_LIBS}
   ${CMAKE_THREAD_LIBS_INIT}
 )
@@ -217,8 +233,10 @@ if (APPLE)
  find_package(Iconv MODULE REQUIRED)
  target_link_libraries(libFBX2glTF Iconv)
 else()
- find_package(libiconv MODULE REQUIRED)
- target_link_libraries(libFBX2glTF libiconv::libiconv)
+find_package(Iconv MODULE REQUIRED)
+#message("Iconv1 ${Iconv_LIBRARY}")
+
+target_link_libraries(libFBX2glTF Iconv::Iconv)
 endif()
 
 target_include_directories(libFBX2glTF PUBLIC
@@ -238,8 +256,10 @@ target_include_directories(libFBX2glTF SYSTEM PUBLIC
 target_include_directories(appFBX2glTF PUBLIC
   "third_party/CLI11"
 )
+message("libFBX2glTF link")
 target_link_libraries(appFBX2glTF libFBX2glTF)
 
+message("libFBX2glTF install")
 install (TARGETS libFBX2glTF appFBX2glTF
         RUNTIME DESTINATION bin
         ARCHIVE DESTINATION lib
